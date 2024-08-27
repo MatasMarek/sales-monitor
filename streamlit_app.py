@@ -22,38 +22,39 @@ else:
         # Read the CSV file into a pandas DataFrame.
         df = pd.read_csv(uploaded_file)
 
-        # Display the DataFrame in Streamlit.
-        st.write("Here's a preview of your data:")
-        st.dataframe(df)  # Display the DataFrame in an interactive table.
+        # Initialize session state for preview toggle.
+        if "show_preview" not in st.session_state:
+            st.session_state.show_preview = False
+
+        # Toggle the preview on/off.
+        if st.button("Toggle Data Preview"):
+            st.session_state.show_preview = not st.session_state.show_preview
+
+        # Display or hide the DataFrame based on the session state.
+        if st.session_state.show_preview:
+            st.write("Here's a preview of your data:")
+            st.dataframe(df)  # Display the DataFrame in an interactive table.
 
         # Ensure that the 'ASIN' column exists in the DataFrame.
         if 'ASIN' in df.columns:
-            # Extract unique ASINs for the dropdown menu.
-            unique_asins = df['ASIN'].unique()
-
             # Count the occurrences of each ASIN.
             asin_counts = df['ASIN'].value_counts()
 
             # Identify ASINs with more than one occurrence.
-            multiple_occurrences = asin_counts[asin_counts > 1]
+            multiple_occurrences = asin_counts[asin_counts > 1].index.tolist()
 
-            # Display the number of products with multiple occurrences.
-            st.write(f"There are {len(multiple_occurrences)} products with multiple occurrences in the dataset.")
+            if len(multiple_occurrences) > 0:
+                # Allow the user to select an ASIN from the dropdown, but only those with multiple occurrences.
+                selected_asin = st.selectbox("Select an ASIN to filter (only showing ASINs with multiple occurrences):", multiple_occurrences)
 
-            # Extract unique ASINs for the dropdown menu.
-            unique_asins = df['ASIN'].unique()
+                # Filter the DataFrame based on the selected ASIN.
+                filtered_df = df[df['ASIN'] == selected_asin]
 
-            # Allow the user to select an ASIN from the dropdown.
-            selected_asin = st.selectbox("Select an ASIN to filter:", unique_asins)
-
-            # Filter the DataFrame based on the selected ASIN.
-            filtered_df = df[df['ASIN'] == selected_asin]
-
-            # Display the filtered DataFrame.
-            st.write(f"Occurrences of ASIN {selected_asin}:")
-            st.dataframe(filtered_df)
-        else:
-            st.error("The CSV file does not contain an 'ASIN' column.")
+                # Display the filtered DataFrame.
+                st.write(f"Occurrences of ASIN {selected_asin}:")
+                st.dataframe(filtered_df)
+            else:
+                st.warning("No ASINs with multiple occurrences found in the dataset.")
 
 
     # Ask user for their OpenAI API key via `st.text_input`.
