@@ -2,6 +2,11 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 
+st.markdown("<h1 style='text-align: center; color: white;'>Marek's Fabulous Richmaker</h1>", unsafe_allow_html=True)
+
+# Display an image, centered below the title
+st.image("angel.jpeg", use_column_width=True)
+
 # Let the user upload multiple files via `st.file_uploader`.
 uploaded_files = st.file_uploader("Upload documents (.csv, .xlsx)", type=["csv", "xlsx"], accept_multiple_files=True)
 
